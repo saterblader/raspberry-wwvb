@@ -72,6 +72,9 @@ int main (void)
   hour = tm_struct->tm_hour;
   day = tm_struct->tm_yday+1;
   year = tm_struct->tm_year-100;
+  //Fix DST issue, need to init isdst to -1 first, then call mktime. Now DST will be properly set based on OS.
+  tm_struct->tm_isdst=-1;
+  mktime(tm_struct);
   isdst = tm_struct->tm_isdst; 
 
   hour += HOUR_DIFF;
@@ -80,8 +83,11 @@ int main (void)
     day += 1; 
   }
 
-  // DST flag does not work for some reason...
-  isdst = 0; 
+  if (isdst==1) {
+          printf("DST is active\n");
+  } else {
+          printf("DST is not active\n");
+  }
 
   // Initialise WiringPi GPIO
   if (wiringPiSetupGpio() == -1) exit(1);
